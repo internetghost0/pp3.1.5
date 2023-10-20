@@ -5,10 +5,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
 
+import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -41,10 +43,9 @@ public class AdminRestController {
 
     @PostMapping("/user")
     public ResponseEntity<?> createUser(@ModelAttribute("user") User user, @ModelAttribute("role") String role) {
-        user.setRolesSet(
-                roleService.getAllRoles().stream().anyMatch(r -> r.getName().equals(role)) ?
-                        roleService.findByNameRole(role).toSet() :
-                        roleService.findByNameRole("ROLE_USER").toSet());
+        user.setRolesSet(roleService.findByNameRole(role)
+                .orElse(roleService.findByNameRole("ROLE_USER").get()));
+
         if (!userService.saveOrUpdateUser(user)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is already exists");
         }
@@ -54,10 +55,9 @@ public class AdminRestController {
     @PutMapping("/user")
     public ResponseEntity<?> updateUser(@ModelAttribute User user, @RequestParam(value = "role") String role) {
         if (user != null) {
-            user.setRolesSet(
-                    roleService.getAllRoles().stream().anyMatch(r -> r.getName().equals(role)) ?
-                            roleService.findByNameRole(role).toSet() :
-                            roleService.findByNameRole("ROLE_USER").toSet());
+            user.setRolesSet(roleService.findByNameRole(role)
+                    .orElse(roleService.findByNameRole("ROLE_USER").get()));
+
             if (user.getPassword() == null || user.getPassword().isEmpty()) {
                 user.setPassword(userService.findUserByID(user.getId()).getPassword());
             } else {
