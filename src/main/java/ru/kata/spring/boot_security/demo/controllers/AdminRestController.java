@@ -3,14 +3,14 @@ package ru.kata.spring.boot_security.demo.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
 
-import java.util.Optional;
 import java.util.Set;
 
 @RestController
@@ -30,6 +30,14 @@ public class AdminRestController {
     @GetMapping
     public ResponseEntity<Set<User>> listUsers() {
         return ResponseEntity.ok().body(userService.findAllUsers());
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> getMe() {
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findByUsername(authentication.getName());
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping("/user/{id}")
@@ -79,6 +87,11 @@ public class AdminRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Cannot delete user with that ID");
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You provided null instead of ID");
+    }
+
+    @GetMapping("/roles")
+    public ResponseEntity<?> getRoles() {
+        return ResponseEntity.ok(roleService.getAllRoles());
     }
 
 }

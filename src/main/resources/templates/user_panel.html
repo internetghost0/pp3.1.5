@@ -6,7 +6,8 @@
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <title>User page</title>
     <link crossorigin="anonymous"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
           rel="stylesheet">
     <style>
         .navbar {
@@ -21,10 +22,7 @@
     <nav class="navbar navbar-dark bg-dark navbar-fixed-top">
         <div class="container-fluid">
             <div>
-                <a class="navbar-brand m-0" href="">
-                    <span th:inline="text"><strong>[[${thisUser.getUsername()}]]</strong></span>
-                    with roles: [[${thisUser.getRolesString()}]]
-                </a>
+                <a class="navbar-brand m-0" href="#" id="header-text"></a>
             </div>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
@@ -59,7 +57,7 @@
                                             </div>
                                             <div class="card-body ">
 
-                                                <table class="table table-striped bg-white">
+                                                <table class="table table-striped bg-white" id='main-table'>
                                                     <thead>
                                                     <tr>
                                                         <th>ID</th>
@@ -72,12 +70,6 @@
                                                     </thead>
                                                     <tbody>
                                                     <tr>
-                                                        <td th:text="${user.getId()}">user></td>
-                                                        <td th:text="${user.getFirstName()}">user</td>
-                                                        <td th:text="${user.getLastName()}">user</td>
-                                                        <td th:text="${user.getAge()}">user</td>
-                                                        <td th:text="${user.getEmail()}">user</td>
-                                                        <td th:text="${user.getRolesString()}">user</td>
 
                                                     </tr>
                                                     </tbody>
@@ -94,5 +86,23 @@
         </div>
     </div>
 </div>
+<script>
+    const baseURL = 'http://localhost:8080/user/api/v1';
+    (async () => {
+        let me = await fetch(baseURL + '/');
+        me = await me.json();
+        const table = document.getElementById('main-table')
+        const newRow = table.insertRow();
+        newRow.insertCell().textContent = me['id'];
+        newRow.insertCell().textContent = me['firstName'];
+        newRow.insertCell().textContent = me['lastName'];
+        newRow.insertCell().textContent = me['age'];
+        newRow.insertCell().textContent = me['email'];
+        newRow.insertCell().textContent = me['rolesString'];
+
+        document.getElementById("header-text").innerHTML =
+            `<span><strong>${me["email"]}</strong></span> with roles: ${me['rolesString']}`;
+    })();
+</script>
 </body>
 </html>
